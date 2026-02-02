@@ -19,7 +19,7 @@ async function checkStatus() {
     lastStatus = JSON.parse(fs.readFileSync(STATUS_FILE)).status;
   }
 
-  if (currentStatus === lastStatus) return;
+  
 
   let message =
     currentStatus === "online"
