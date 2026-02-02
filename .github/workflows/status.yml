@@ -23,6 +23,7 @@ jobs:
       - name: Run status checker
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
         run: node status.js
 
       - name: Save status
