@@ -4,6 +4,7 @@ const fs = require("fs");
 const SERVER_ADDRESS = process.env.SERVER_IP; // CHANGE THIS
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const API_URL = `https://api.mcstatus.io/v2/status/java/${SERVER_ADDRESS}`;
+const ROLE_ID = "1467710268124565778";
 
 const STATUS_FILE = "last_status.json";
 
@@ -22,8 +23,8 @@ async function checkStatus() {
 
   let message =
     currentStatus === "online"
-      ? `🟢 **Minecraft Server is ONLINE**\nPlayers: ${data.players.online}/${data.players.max}\nVersion: ${data.version.name_clean}`
-      : `🔴 **Minecraft Server is OFFLINE**`;
+      ? `🟢 **Minecraft Server is ONLINE** <@&$(ROLE_ID)>\nPlayers: ${data.players.online}/${data.players.max}\nVersion: ${data.version.name_clean}`
+      : `🔴 **Minecraft Server is OFFLINE <@&$(ROLE_ID)>**`;
 
   await fetch(WEBHOOK_URL, {
     method: "POST",
