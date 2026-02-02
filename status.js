@@ -1,35 +1,39 @@
 const fetch = require("node-fetch");
-const fs = require("fs");
 
-const SERVER_ADDRESS = process.env.SERVER_IP; // CHANGE THIS
+// Environment variables (from GitHub secrets)
+const SERVER_ADDRESS = process.env.SERVER_IP;
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
-const API_URL = `https://api.mcstatus.io/v2/status/java/${SERVER_ADDRESS}`;
-const ROLE_ID = "1467710268124565778";
+const ROLE_ID = process.env.DISCORD_ROLE_ID; // optional
 
-const STATUS_FILE = "last_status.json";
+// API URL for mcstatus.io
+const API_URL = `https://api.mcstatus.io/v2/status/java/${SERVER_ADDRESS}`;
 
 async function checkStatus() {
-  const res = await fetch(API_URL);
-  const data = await res.json();
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
 
-  const currentStatus = data.online ? "online" : "offline";
+    // Determine status
+    const currentStatus = data.online ? "online" : "offline";
 
-  
+    // Build Discord message
+    let message =
+      currentStatus === "online"
+        ? `🟢 **Minecraft Server is ONLINE** ${ROLE_ID ? `<@&${ROLE_ID}>` : ""}\nPlayers: ${data.players.online}/${data.players.max}\nVersion: ${data.version.name_clean}`
+        : `🔴 **Minecraft Server is OFFLINE** ${ROLE_ID ? `<@&${ROLE_ID}>` : ""}`;
 
-  
+    // Send to Discord
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: message })
+    });
 
-  let message =
-    currentStatus === "online"
-      ? `🟢 **Minecraft Server is ONLINE** <@&${ROLE_ID}>\nPlayers: ${data.players.online}/${data.players.max}\nVersion: ${data.version.name_clean}`
-      : `🔴 **Minecraft Server is OFFLINE <@&${ROLE_ID}>**`;
-
-  await fetch(WEBHOOK_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: message })
-  });
-
-  fs.writeFileSync(STATUS_FILE, JSON.stringify({ status: currentStatus }));
+    console.log(`Status sent: ${currentStatus}`);
+  } catch (err) {
+    console.error("Error fetching server status:", err);
+  }
 }
 
+// Run the checker
 checkStatus();
