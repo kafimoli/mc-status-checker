@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 const fs = require("fs");
 
-const SERVER_ADDRESS = "peter-challenging.gl.joinmc.link"; // CHANGE THIS
+const SERVER_ADDRESS = process.env.SERVER_IP; // CHANGE THIS
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const API_URL = `https://api.mcstatus.io/v2/status/java/${SERVER_ADDRESS}`;
 
