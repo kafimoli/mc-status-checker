@@ -23,8 +23,8 @@ async function checkStatus() {
 
   let message =
     currentStatus === "online"
-      ? `🟢 **Minecraft Server is ONLINE** <@&$(ROLE_ID)>\nPlayers: ${data.players.online}/${data.players.max}\nVersion: ${data.version.name_clean}`
-      : `🔴 **Minecraft Server is OFFLINE <@&$(ROLE_ID)>**`;
+      ? `🟢 **Minecraft Server is ONLINE** <@&${ROLE_ID}>\nPlayers: ${data.players.online}/${data.players.max}\nVersion: ${data.version.name_clean}`
+      : `🔴 **Minecraft Server is OFFLINE <@&${ROLE_ID}>**`;
 
   await fetch(WEBHOOK_URL, {
     method: "POST",
