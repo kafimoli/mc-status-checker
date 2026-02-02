@@ -43,7 +43,7 @@ async function checkStatus() {
 
     // Add role mention
     if (ROLE_ID) {
-      message = `<@&${ROLE_ID}> ` + message;
+      message = message + `<@&${ROLE_ID}> `;
     }
 
     // Add extra info if online
