@@ -3,6 +3,7 @@ const fs = require("fs");
 
 const SERVER_ADDRESS = process.env.SERVER_IP;
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
+const ROLE_ID = process.env.DISCORD_ROLE_ID; // optional
 
 if (!SERVER_ADDRESS || !WEBHOOK_URL) {
   console.error("Missing environment variables");
@@ -12,10 +13,17 @@ if (!SERVER_ADDRESS || !WEBHOOK_URL) {
 const API_URL = `https://api.mcstatus.io/v2/status/java/${SERVER_ADDRESS}`;
 const STATUS_FILE = "last_status.json";
 
+// ===== Status check =====
 async function checkStatus() {
   try {
     const res = await fetch(API_URL);
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      console.log("API returned invalid JSON, skipping this check");
+      return;
+    }
 
     const currentStatus = data.online ? "online" : "offline";
 
@@ -29,11 +37,22 @@ async function checkStatus() {
       return;
     }
 
-    const message =
-      currentStatus === "online"
-        ? `🟢 **Minecraft Server is ONLINE**`
-        : `🔴 **Minecraft Server is OFFLINE**`;
+    // Status changed → build message
+    const emoji = currentStatus === "online" ? "🟢" : "🔴";
+    let message = `${emoji} **Minecraft Server is ${currentStatus.toUpperCase()}**`;
 
+    // Add role mention
+    if (ROLE_ID) {
+      message = `<@&${ROLE_ID}> ` + message;
+    }
+
+    // Add extra info if online
+    if (currentStatus === "online") {
+      message += `\nPlayers: ${data.players.online}/${data.players.max}`;
+      message += `\nVersion: ${data.version.name_clean}`;
+    }
+
+    // Send to Discord
     await fetch(WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -43,9 +62,10 @@ async function checkStatus() {
     fs.writeFileSync(STATUS_FILE, JSON.stringify({ status: currentStatus }));
     console.log("Status changed:", currentStatus);
   } catch (err) {
-    console.error("Error:", err.message);
+    console.error("Error in checkStatus:", err.message);
   }
 }
 
-checkStatus();
-setInterval(checkStatus, 60 * 1000);
+// ===== Run loop =====
+checkStatus(); // first check
+setInterval(checkStatus, 60 * 1000); // every 60 seconds
