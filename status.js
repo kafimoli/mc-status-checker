@@ -14,10 +14,7 @@ async function checkStatus() {
 
   const currentStatus = data.online ? "online" : "offline";
 
-  let lastStatus = null;
-  if (fs.existsSync(STATUS_FILE)) {
-    lastStatus = JSON.parse(fs.readFileSync(STATUS_FILE)).status;
-  }
+  
 
   
 
