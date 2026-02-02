@@ -8,6 +8,8 @@ const ROLE_ID = process.env.DISCORD_ROLE_ID; // optional
 // API URL for mcstatus.io
 const API_URL = `https://api.mcstatus.io/v2/status/java/${SERVER_ADDRESS}`;
 
+const STATUS_FILE = "last_status.json";
+
 async function checkStatus() {
   try {
     const res = await fetch(API_URL);
@@ -15,6 +17,15 @@ async function checkStatus() {
 
     // Determine status
     const currentStatus = data.online ? "online" : "offline";
+
+    let lastStatus = null;
+      if (fs.existsSync(STATUS_FILE)) {
+        lastStatus = JSON.parse(fs.readFileSync(STATUS_FILE)).status;
+      }
+
+    // Always send message if first run
+    if (lastStatus && currentStatus === lastStatus) return;
+
 
     // Build Discord message
     let message =
