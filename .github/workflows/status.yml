@@ -1,35 +1,29 @@
-name: MC Status Checker
+name: Minecraft Status Checker
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
-  workflow_dispatch:
+    - cron: "*/5 * * * *"  # every 5 minutes
+  workflow_dispatch:        # allows manual runs
 
 jobs:
   check:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: npm install node-fetch@2
 
       - name: Run status checker
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
+          DISCORD_ROLE_ID: ${{ secrets.DISCORD_ROLE_ID }} # optional
         run: node status.js
-
-      - name: Save status
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add last_status.json || true
-          git commit -m "Update server status" || true
-          git push || true
